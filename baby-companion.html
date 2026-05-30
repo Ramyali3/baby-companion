@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Baby Guide">
+<meta name="theme-color" content="#2d6a4f">
+<title>Baby Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-dark:#1b4332;--green:#2d6a4f;--green-mid:#40916c;--green-light:#b7e4c7;
+  --green-pale:#d8f3dc;--green-ghost:#f0faf4;--amber:#f4a261;--amber-pale:#fff3e0;
+  --cream:#faf9f6;--border:#e8e3dc;--text:#2c2c2c;--text-mid:#555;--text-soft:#888;--text-faint:#bbb;
+  --radius:14px;--safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+  --accent:#2d6a4f;--accent-dark:#1b4332;--accent-mid:#40916c;--accent-light:#b7e4c7;
+  --accent-pale:#d8f3dc;--accent-ghost:#f0faf4;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--cream);font-family:'DM Sans',sans-serif;color:var(--text);overflow:hidden}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto}
+#kid-bar{background:linear-gradient(135deg,var(--accent-dark) 0%,var(--accent-mid) 100%);padding:calc(10px + var(--safe-top)) 16px 0;flex-shrink:0}
+.kid-tabs{display:flex;gap:8px;align-items:flex-end}
+.kid-tab{padding:8px 16px 9px;border:none;border-radius:10px 10px 0 0;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;background:rgba(255,255,255,0.15);color:rgba(255,255,255,0.75);transition:all 0.15s;white-space:nowrap}
+.kid-tab.active{background:var(--cream);color:var(--accent-dark)}
+.kid-tab-add{padding:8px 14px 9px;border:none;border-radius:10px 10px 0 0;cursor:pointer;font-size:18px;background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);transition:all 0.15s}
+#subheader{background:var(--cream);border-bottom:1px solid var(--border);padding:10px 16px 0;flex-shrink:0}
+.sub-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.h-name{font-family:'Lora',serif;font-weight:600;font-size:17px;color:var(--accent-dark)}
+.h-age{font-size:11px;color:var(--text-soft);margin-top:1px}
+.h-right{display:flex;gap:8px;align-items:center}
+.leap-badge{background:var(--accent);color:white;border-radius:20px;padding:4px 11px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif}
+.settings-btn{background:transparent;border:1.5px solid var(--border);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px}
+nav{display:flex;background:var(--cream);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:58px;padding:9px 2px;border:none;background:transparent;cursor:pointer;font-size:10.5px;color:var(--text-soft);font-family:'DM Sans',sans-serif;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+main{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.scroll{flex:1;overflow-y:auto;padding:14px 14px calc(20px + var(--safe-bottom))}
+.scroll::-webkit-scrollbar{display:none}
+#setup{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100dvh;background:linear-gradient(160deg,var(--green-pale) 0%,var(--cream) 60%);padding:32px 24px}
+.setup-card{background:white;border-radius:24px;padding:36px 28px;width:100%;max-width:380px;box-shadow:0 10px 50px rgba(45,106,79,0.14);text-align:center}
+.setup-emoji{font-size:56px;margin-bottom:14px}
+.setup-title{font-family:'Lora',serif;font-size:28px;color:var(--green-dark);margin-bottom:4px}
+.setup-sub{color:var(--text-soft);font-size:13px;font-style:italic;margin-bottom:28px}
+.setup-form{text-align:left;display:flex;flex-direction:column;gap:14px}
+label{font-size:12px;font-weight:600;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.8px}
+input[type=text],input[type=date]{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream);transition:border-color 0.2s}
+input:focus{border-color:var(--green-mid)}
+.setup-btn{margin-top:6px;padding:14px;background:linear-gradient(135deg,var(--green-dark),var(--green-mid));color:white;border:none;border-radius:12px;font-size:16px;font-family:'Lora',serif;cursor:pointer;letter-spacing:0.5px}
+.api-note{font-size:12px;color:var(--text-soft);line-height:1.5;margin-top:6px}
+.api-note a{color:var(--green)}
+.card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.card-accent{background:linear-gradient(135deg,var(--accent-pale) 0%,var(--accent-ghost) 100%);border-color:var(--accent-light)}
+.card-amber{background:linear-gradient(135deg,var(--amber-pale) 0%,#fff8ee 100%);border-color:#f4c192}
+.section-label{font-size:10px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+.leap-header{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.leap-pill{background:var(--accent);color:white;border-radius:20px;padding:3px 10px;font-size:11px;font-weight:700}
+.leap-pill.amber{background:var(--amber)}.leap-pill.gray{background:#aaa}
+.leap-title{font-family:'Lora',serif;font-weight:600;font-size:14px;color:var(--accent-dark)}
+.leap-tip{font-size:12.5px;color:var(--text-mid);background:rgba(255,255,255,0.6);border-radius:8px;padding:8px 10px;margin-top:8px;line-height:1.55}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.chip{font-size:11.5px;color:var(--text-mid);background:rgba(255,255,255,0.7);border-radius:6px;padding:3px 7px;margin-bottom:4px;line-height:1.4}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:14px 10px;text-align:center}
+.stat-icon{font-size:22px;margin-bottom:4px}
+.stat-val{font-family:'Lora',serif;font-weight:600;font-size:16px;color:var(--accent-dark)}
+.stat-lbl{font-size:10px;color:var(--text-soft);margin-top:2px;text-transform:uppercase;letter-spacing:0.6px}
+.quick-btns{display:flex;gap:8px;margin-top:8px}
+.quick-btn{flex:1;border:none;border-radius:12px;padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;transition:transform 0.1s}
+.quick-btn:active{transform:scale(0.95)}
+.log-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid #f5f0ea;font-size:13px}
+.log-row:last-child{border-bottom:none}
+.log-type{font-weight:600;text-transform:capitalize;flex:0 0 auto}
+.log-detail{color:var(--text-soft);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+.log-time{color:var(--text-faint);font-size:11px;flex:0 0 auto}
+.del-btn{border:none;background:transparent;color:var(--text-faint);cursor:pointer;font-size:18px;padding:0 2px;line-height:1;flex-shrink:0}
+.log-entry{background:white;border:1px solid var(--border);border-left:4px solid;border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.log-entry-icon{font-size:22px;flex-shrink:0}
+.log-entry-label{font-size:11px;font-weight:600;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.6px;flex-shrink:0;width:44px;text-align:center}
+.log-entry input{flex:1;border:1px solid #eee;border-radius:8px;padding:8px 10px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none;min-width:0}
+.log-entry-btn{border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:13px;font-family:'DM Sans',sans-serif;flex-shrink:0}
+.leap-list-card{background:white;border:1px solid var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:8px}
+.leap-list-card.active{background:var(--accent-ghost);border-color:var(--accent-light)}
+.leap-list-card.past{opacity:0.45}
+.sched-item{display:flex;align-items:center;gap:12px;padding:9px 0;border-bottom:1px solid #f5f0ea;font-size:13px}
+.sched-item:last-child{border-bottom:none}
+.sched-time{color:var(--text-soft);flex:0 0 68px;font-size:12px}
+.sched-note{background:#fffdf7;border:1px solid #e8dcc8;border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--text-mid);margin-bottom:10px;line-height:1.6}
+.sched-note.green{background:var(--accent-ghost);border-color:var(--accent-light)}
+#chat-wrap{display:flex;flex-direction:column;height:100%;overflow:hidden}
+#chat-msgs{flex:1;overflow-y:auto;padding:14px 14px 8px;scroll-behavior:smooth}
+#chat-msgs::-webkit-scrollbar{display:none}
+.bubble{display:flex;align-items:flex-end;gap:7px;margin-bottom:12px}
+.bubble.user{flex-direction:row-reverse}
+.bot-avatar{font-size:20px;flex-shrink:0;margin-bottom:2px}
+.bubble-text{max-width:82%;padding:10px 13px;border-radius:16px;font-size:13.5px;line-height:1.6;white-space:pre-wrap}
+.bubble.bot .bubble-text{background:white;border:1px solid var(--border);color:var(--text);border-bottom-left-radius:4px}
+.bubble.user .bubble-text{background:var(--accent);color:white;border-bottom-right-radius:4px}
+.typing-dots{display:flex;gap:4px;padding:13px 16px;background:white;border:1px solid var(--border);border-radius:16px;border-bottom-left-radius:4px;align-items:center}
+.typing-dots span{width:6px;height:6px;border-radius:50%;background:var(--text-faint);animation:bounce 1.2s infinite}
+.typing-dots span:nth-child(2){animation-delay:0.2s}.typing-dots span:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-5px)}}
+.chat-bottom{background:white;border-top:1px solid var(--border);padding:8px 12px calc(8px + var(--safe-bottom))}
+.chat-input-row{display:flex;gap:8px;margin-bottom:6px}
+#chat-field{flex:1;border:1.5px solid var(--border);border-radius:24px;padding:10px 16px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;background:var(--cream)}
+#chat-field:focus{border-color:var(--accent-mid)}
+#send-btn{background:var(--accent);color:white;border:none;border-radius:50%;width:42px;height:42px;font-size:18px;cursor:pointer;flex-shrink:0}
+#send-btn:disabled{background:var(--text-faint);cursor:default}
+.suggestions{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.suggestions::-webkit-scrollbar{display:none}
+.sugg-btn{background:var(--accent-ghost);border:1px solid var(--accent-light);border-radius:20px;padding:5px 12px;font-size:11.5px;cursor:pointer;white-space:nowrap;font-family:'DM Sans',sans-serif;color:var(--accent-dark);flex-shrink:0}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:white;border-radius:24px 24px 0 0;padding:24px 24px calc(24px + var(--safe-bottom));width:100%;max-width:480px;max-height:90dvh;overflow-y:auto}
+.modal-title{font-family:'Lora',serif;font-size:20px;margin-bottom:18px;color:var(--accent-dark)}
+.modal form{display:flex;flex-direction:column;gap:14px}
+.modal-btns{display:flex;gap:10px;margin-top:6px}
+.modal-save{flex:1;padding:13px;background:var(--green);color:white;border:none;border-radius:10px;font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:600}
+.modal-cancel{padding:13px 20px;background:#f0f0f0;color:var(--text-mid);border:none;border-radius:10px;font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.modal-danger{padding:13px 20px;background:#fee2e2;color:#dc2626;border:none;border-radius:10px;font-size:15px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.kid-color-row{display:flex;gap:10px;margin-top:4px}
+.color-dot{width:32px;height:32px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:transform 0.1s}
+.color-dot.selected{border-color:var(--text);transform:scale(1.15)}
+.empty-state{color:var(--text-faint);text-align:center;padding:28px 20px;font-size:13.5px}
+#install-banner{background:var(--green-dark);color:white;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;font-size:12.5px;flex-shrink:0}
+#install-banner button{background:white;color:var(--green-dark);border:none;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+</style>
+</head>
+<body>
+
+<div id="setup">
+  <div class="setup-card">
+    <div class="setup-emoji">🌱</div>
+    <h1 class="setup-title">Baby Companion</h1>
+    <p class="setup-sub">Moms on Call · Emily Oster · Wonder Weeks</p>
+    <form class="setup-form" onsubmit="completeSetup(event)">
+      <div><label>First child's name</label><input type="text" id="s-name" placeholder="e.g. Ellie" autocomplete="off"></div>
+      <div><label>Date of birth *</label><input type="date" id="s-dob" required></div>
+      <div><label>Pick a color</label><div class="kid-color-row" id="setup-colors"></div></div>
+      <div>
+        <label>Anthropic API Key *</label>
+        <input type="text" id="s-key" placeholder="sk-ant-..." required autocomplete="off" style="font-family:monospace;font-size:13px">
+        <p class="api-note">Get a free key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Stored only on your device.</p>
+      </div>
+      <button class="setup-btn" type="submit">Let's go &rarr;</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="install-banner" style="display:none">
+    <span id="install-msg">&#128241; Tap Share &rarr; Add to Home Screen</span>
+    <div style="display:flex;gap:6px">
+      <button onclick="dismissInstall()">Got it</button>
+      <button style="background:transparent;color:rgba(255,255,255,0.5);font-size:18px;border:none;cursor:pointer" onclick="dismissInstall()">&times;</button>
+    </div>
+  </div>
+  <div id="kid-bar"><div class="kid-tabs" id="kid-tabs"></div></div>
+  <div id="subheader">
+    <div class="sub-row">
+      <div><div class="h-name" id="h-name"></div><div class="h-age" id="h-age"></div></div>
+      <div class="h-right">
+        <span id="sync-status" style="font-size:10px;color:#888;font-family:'DM Sans',sans-serif"></span>
+        <button class="leap-badge" id="leap-badge" style="display:none" onclick="setTab('leaps')"></button>
+        <button class="settings-btn" onclick="openSettings()">&#9881;&#65039;</button>
+      </div>
+    </div>
+    <nav>
+      <button class="tab active" onclick="setTab('dashboard')" data-tab="dashboard">&#127968; Today</button>
+      <button class="tab" onclick="setTab('log')" data-tab="log">&#128221; Log</button>
+      <button class="tab" onclick="setTab('leaps')" data-tab="leaps">&#9889; Leaps</button>
+      <button class="tab" onclick="setTab('schedule')" data-tab="schedule">&#128336; Schedule</button>
+      <button class="tab" onclick="setTab('potty')" data-tab="potty">🚽 Potty</button>
+      <button class="tab" onclick="setTab('chat')" data-tab="chat">&#128172; Chat</button>
+    </nav>
+  </div>
+  <main>
+    <div id="tab-dashboard" class="scroll"></div>
+    <div id="tab-log" class="scroll" style="display:none"></div>
+    <div id="tab-leaps" class="scroll" style="display:none"></div>
+    <div id="tab-schedule" class="scroll" style="display:none"></div>
+    <div id="tab-potty" class="scroll" style="display:none"></div>
+    <div id="tab-chat" style="display:none;height:100%;overflow:hidden">
+      <div id="chat-wrap">
+        <div id="chat-msgs"></div>
+        <div class="chat-bottom">
+          <div class="chat-input-row">
+            <input id="chat-field" type="text" placeholder="Ask about sleep, feeding, potty training…" onkeydown="if(event.key==='Enter')sendChat()">
+            <button id="send-btn" onclick="sendChat()">&uarr;</button>
+          </div>
+          <div class="suggestions">
+            <button class="sugg-btn" onclick="setInput('Why is my baby so fussy?')">Why so fussy?</button>
+            <button class="sugg-btn" onclick="setInput('Is this a sleep regression?')">Sleep regression?</button>
+            <button class="sugg-btn" onclick="setInput('What should our schedule look like today?')">Today's schedule?</button>
+            <button class="sugg-btn" onclick="setInput('Is my child ready for potty training?')">Potty ready?</button>
+            <button class="sugg-btn" onclick="setInput('Walk me through the Moms on Call potty training method')">MOC potty method</button>
+            <button class="sugg-btn" onclick="setInput('How do I handle potty training regression?')">Potty regression?</button>
+            <button class="sugg-btn" onclick="setInput('When can I start solids?')">Starting solids?</button>
+            <button class="sugg-btn" onclick="setInput('How do I do the 4S routine?')">4S routine?</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="settings-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <div class="modal-title" id="settings-title">Settings</div>
+    <form onsubmit="saveSettings(event)">
+      <div><label>Name</label><input type="text" id="set-name" autocomplete="off"></div>
+      <div><label>Date of birth</label><input type="date" id="set-dob" required></div>
+      <div><label>Color</label><div class="kid-color-row" id="settings-colors"></div></div>
+      <div>
+        <label>Anthropic API Key</label>
+        <input type="text" id="set-key" autocomplete="off" style="font-family:monospace;font-size:13px">
+        <p class="api-note">Stored only on your device.</p>
+      </div>
+      <div class="modal-btns">
+        <button type="button" class="modal-cancel" onclick="closeSettings()">Cancel</button>
+        <button type="button" class="modal-danger" onclick="confirmRemoveKid()">Remove</button>
+        <button type="submit" class="modal-save">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="addkid-modal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeAddKid()">
+  <div class="modal">
+    <div class="modal-title">Add Child</div>
+    <form onsubmit="saveNewKid(event)">
+      <div><label>Name</label><input type="text" id="ak-name" placeholder="e.g. James" autocomplete="off"></div>
+      <div><label>Date of birth *</label><input type="date" id="ak-dob" required></div>
+      <div><label>Pick a color</label><div class="kid-color-row" id="addkid-colors"></div></div>
+      <div class="modal-btns">
+        <button type="button" class="modal-cancel" onclick="closeAddKid()">Cancel</button>
+        <button type="submit" class="modal-save">Add Child</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+var KID_COLORS=[
+  {id:'green',label:'Sage',vars:{'--accent':'#2d6a4f','--accent-dark':'#1b4332','--accent-mid':'#40916c','--accent-light':'#b7e4c7','--accent-pale':'#d8f3dc','--accent-ghost':'#f0faf4'}},
+  {id:'rose',label:'Rose',vars:{'--accent':'#c0526a','--accent-dark':'#7d1d30','--accent-mid':'#d4748a','--accent-light':'#f5c2cb','--accent-pale':'#fde8ec','--accent-ghost':'#fff5f7'}},
+  {id:'sky',label:'Sky',vars:{'--accent':'#2a7ab0','--accent-dark':'#1a4d70','--accent-mid':'#3d94cc','--accent-light':'#aad4f0','--accent-pale':'#d6ecfa','--accent-ghost':'#f0f8ff'}},
+  {id:'amber',label:'Amber',vars:{'--accent':'#c07a28','--accent-dark':'#7a4a10','--accent-mid':'#d4953c','--accent-light':'#f4d59a','--accent-pale':'#fef0d0','--accent-ghost':'#fffaf0'}},
+  {id:'purple',label:'Lilac',vars:{'--accent':'#7a5af8','--accent-dark':'#4c2f9e','--accent-mid':'#9b7cf9','--accent-light':'#cdbcfc','--accent-pale':'#ede9fe','--accent-ghost':'#f5f3ff'}}
+];
+var LEAPS=[
+  {n:1,s:4.5,e:5.5,name:"The World of Changing Sensations",skills:["Heightened sensory awareness","May startle more easily","Notices high-contrast patterns"],storm:["Fussier than usual","Wants constant contact","Sleep disruption"],tip:"Your baby's senses just got dramatically sharper. Skin-to-skin and gentle rocking are your best tools.",mocNote:"Maintain your schedule even during fussiness. The structure itself is calming.",osterNote:"Research shows babies this age are genuinely overwhelmed — your instinct to comfort more is correct."},
+  {n:2,s:7.5,e:9.5,name:"The World of Patterns",skills:["First social smiles appear","Recognizes familiar faces","Cooing and gurgling begin"],storm:["Clingy","Increased crying","Frequent night waking"],tip:"Talk and smile constantly — they're learning the world has patterns. Your face is their favorite pattern.",mocNote:"Around 8 weeks, babies handle 60-90 min wake windows. First real schedule is possible now.",osterNote:"The social smile is one of the most evidence-backed milestones. If absent by 10 weeks, mention to pediatrician."},
+  {n:3,s:11.5,e:12.5,name:"The World of Smooth Transitions",skills:["Movements become coordinated","Discovers own hands","Tracks moving objects smoothly"],storm:["Cranky","Wants to nurse/bottle constantly","Hard to settle for naps"],tip:"Hang a high-contrast mobile. They're fascinated by smooth movement — their own hands will captivate them.",mocNote:"3-month mark is a great reset. Try the EASY routine: Eat, Activity, Sleep, Your time.",osterNote:"Tummy time 2-3x daily helps neck strength. Most babies tolerate it better after 10 weeks."},
+  {n:4,s:14.5,e:19.5,name:"The World of Events",skills:["Cause and effect understanding","Intentional grabbing","Laughs out loud","Rolling may begin"],storm:["Most intense leap - major fussiness","Significant night wakings","Separation anxiety begins","Nursing strikes"],tip:"This is the hardest leap. Peek-a-boo is perfect now. They understand 'I do X then Y happens.'",mocNote:"Leap 4 often coincides with the 4-month sleep regression. Ideal window to begin sleep training if you choose.",osterNote:"4-month regression is biologically driven. Sleep training at 4-6 months has strong evidence with no lasting harm."},
+  {n:5,s:22.5,e:26.5,name:"The World of Relationships",skills:["Understands near vs far","Sits with support","Stranger anxiety begins","Reaches for parents"],storm:["Clingy when you leave","Disturbed sleep","May refuse others"],tip:"They now understand distance — that you can be 'there' but not 'here.' This is why separation is suddenly distressing.",mocNote:"Solid transition: start at 6 months with single-ingredient purees once per day at dinnertime.",osterNote:"AAP recommends solids around 6 months. Introducing allergens early (peanut, egg) actually reduces allergy risk."},
+  {n:6,s:33.5,e:37.5,name:"The World of Categories",skills:["Groups objects by type","Points at objects","Understands 'no'","Pulls to stand"],storm:["Three C's: Cranky, Clingy, Crying","Sleep disruption","Appetite swings"],tip:"Name and categorize everything. 'Dog. Another dog! Big dog, small dog.' They're building mental filing cabinets.",mocNote:"By 8-9 months, two naps of 1-1.5 hours each. Bedtime 6:30-7:30 PM is the sweet spot.",osterNote:"Baby-led weaning has good evidence — finger foods alongside purees are safe with good head control."},
+  {n:7,s:41.5,e:46.5,name:"The World of Sequences",skills:["Claps and waves","First words forming","Stacks and nests objects","Cruises along furniture"],storm:["Crying at separation","Night waking after good stretches","Clinginess peaks"],tip:"Sequences fascinate them: in-out, up-down, open-close. Give them containers to fill and dump.",mocNote:"The bath-book-bed routine is more powerful than ever. Exact sequence matters to them now.",osterNote:"'Mama' and 'dada' expected by 12 months. 10+ words by 12-15 months is the milestone range."},
+  {n:8,s:51.5,e:54.5,name:"The World of Programs",skills:["Walks or attempts it","Multi-step problem solving","Pretend play begins","Points to show you things"],storm:["Tantrums starting","Testing limits","Resists sleep"],tip:"They're learning things work in steps. Give them nested problems: shape sorters, simple puzzles.",mocNote:"One nap transition happens 12-18 months. Keep two naps until they fight both for 2+ weeks straight.",osterNote:"Walking range is 9-15 months and still normal. No need to intervene if otherwise developing well."},
+  {n:9,s:59.5,e:64.5,name:"The World of Principles",skills:["Runs, climbs","Two-word phrases","Strong opinions","Parallel play"],storm:["Strong-willed behavior","Meltdowns","Resists everything","Sleep battles"],tip:"They're discovering principles — rules that always apply. Consistency from you helps them feel safe.",mocNote:"Toddler bedtime battles: firm, loving routine with minimal re-entries. Two warnings, then done.",osterNote:"Tantrums peak 18-24 months. They're neurological, not manipulation. Acknowledging feelings works better than logic."},
+  {n:10,s:70.5,e:76.5,name:"The World of Systems",skills:["Complex imaginative play","Negotiates","Understands rules and fairness","Runs confidently"],storm:["Big emotions","Testing everything","Sleep changes","Strong sense of 'mine'"],tip:"Systems fascinate them — games with rules, role play, how things work. Play becomes truly creative.",mocNote:"Most toddlers don't need a nap after 3 years, but 30-60 min quiet time alone remains valuable.",osterNote:"Reading aloud and back-and-forth conversation are the highest-ROI activities for language development now."}
+];
+var WAKE_WINDOWS=[
+  {minW:0,maxW:6,label:"45-60 min",wMax:60,feed:2.5,sleep:16,naps:4},
+  {minW:6,maxW:12,label:"1-1.5 hrs",wMax:90,feed:3,sleep:15,naps:3},
+  {minW:12,maxW:20,label:"1.5-2 hrs",wMax:120,feed:3.5,sleep:14.5,naps:3},
+  {minW:20,maxW:32,label:"2-2.5 hrs",wMax:150,feed:4,sleep:14,naps:2},
+  {minW:32,maxW:52,label:"2.5-3 hrs",wMax:180,feed:4.5,sleep:13.5,naps:2},
+  {minW:52,maxW:80,label:"3-4 hrs",wMax:240,feed:5,sleep:13,naps:1}
+];
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE CONFIG
+// ═══════════════════════════════════════════════════════
+var SB_URL='https://ebarolmnztyjpdbjkrvz.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViYXJvbG1uenR5anBkYmprcnZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTk3MzUsImV4cCI6MjA5NTY5NTczNX0.80BrYav0q1hjAZCbcznTU3RGtxzbgKW_5o4NIa5hVdQ';
+
+function sbHeaders(){return{'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=representation'};}
+
+async function sbGet(table,params){
+  var url=SB_URL+'/rest/v1/'+table+'?'+params;
+  var r=await fetch(url,{headers:sbHeaders()});
+  return r.ok?await r.json():[];
+}
+async function sbUpsert(table,data){
+  var r=await fetch(SB_URL+'/rest/v1/'+table,{method:'POST',headers:Object.assign({},sbHeaders(),{'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify(data)});
+  return r.ok?await r.json():null;
+}
+async function sbInsert(table,data){
+  var r=await fetch(SB_URL+'/rest/v1/'+table,{method:'POST',headers:sbHeaders(),body:JSON.stringify(data)});
+  return r.ok?await r.json():null;
+}
+async function sbDelete(table,filter){
+  var r=await fetch(SB_URL+'/rest/v1/'+table+'?'+filter,{method:'DELETE',headers:sbHeaders()});
+  return r.ok;
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE — local for speed, Supabase for sync
+// ═══════════════════════════════════════════════════════
+var appState={apiKey:'',kids:[],activeKid:0,currentTab:'dashboard',synced:false};
+
+function loadLocal(){
+  try{var s=localStorage.getItem('bc_v4');if(s)appState=Object.assign({},appState,JSON.parse(s));}catch(e){}
+}
+function saveLocal(){
+  // Save everything except we'll keep kids/logs in sync with Supabase
+  localStorage.setItem('bc_v4',JSON.stringify(appState));
+}
+
+// Show a subtle sync indicator
+function showSyncStatus(status){
+  var el=document.getElementById('sync-status');
+  if(!el)return;
+  if(status==='syncing'){el.textContent='↑ syncing';el.style.color='#f4a261';}
+  else if(status==='ok'){el.textContent='✓ synced';el.style.color='#40916c';setTimeout(function(){el.textContent='';},2000);}
+  else if(status==='offline'){el.textContent='● offline';el.style.color='#aaa';}
+  else el.textContent='';
+}
+
+// Pull all data from Supabase into appState
+async function syncFromCloud(){
+  try{
+    showSyncStatus('syncing');
+    var kids=await sbGet('kids','select=*&order=id');
+    if(!kids||!kids.length){showSyncStatus('ok');return;}
+    // Build kids array merging cloud data with local logs cache
+    appState.kids=kids.map(function(k){
+      var existing=appState.kids.find(function(x){return x.id===k.id;})||{};
+      return Object.assign({},existing,{id:k.id,name:k.name,dob:k.dob,color:k.color,logs:existing.logs||[],chatHistory:existing.chatHistory||[]});
+    });
+    // Load logs for each kid
+    var allLogs=await sbGet('logs','select=*&order=time.desc&limit=300');
+    var allChats=await sbGet('chat_history','select=*&order=created_at.asc&limit=200');
+    appState.kids.forEach(function(k){
+      k.logs=(allLogs||[]).filter(function(l){return l.kid_id===k.id;}).map(function(l){return{id:l.id,type:l.type,detail:l.detail||'',time:l.time};});
+      k.chatHistory=(allChats||[]).filter(function(c){return c.kid_id===k.id;}).map(function(c){return{role:c.role,content:c.content};});
+    });
+    // Keep activeKid in bounds
+    if(appState.activeKid>=appState.kids.length)appState.activeKid=0;
+    saveLocal();
+    showSyncStatus('ok');
+    // Re-render current view
+    updateHeader();renderKidBar();
+    var t=appState.currentTab;
+    if(t==='dashboard')renderDashboard();
+    else if(t==='log')renderLog();
+    else if(t==='chat')reloadChat();
+  }catch(e){showSyncStatus('offline');console.log('Sync error',e);}
+}
+
+// Push a kid profile to Supabase
+async function pushKid(k){
+  showSyncStatus('syncing');
+  await sbUpsert('kids',[{id:k.id,name:k.name,dob:k.dob,color:k.color,updated_at:new Date().toISOString()}]);
+  showSyncStatus('ok');
+}
+
+// Push a new log entry to Supabase
+async function pushLog(kidId,log){
+  await sbInsert('logs',[{id:log.id,kid_id:kidId,type:log.type,detail:log.detail||'',time:log.time}]);
+}
+
+// Push a chat message to Supabase
+async function pushChat(kidId,msg){
+  await sbInsert('chat_history',[{kid_id:kidId,role:msg.role,content:msg.content}]);
+}
+
+// Delete a log from Supabase
+async function deleteLogCloud(id){
+  await sbDelete('logs','id=eq.'+id);
+}
+
+function kid(){return appState.kids[appState.activeKid];}
+function getWeeks(k){if(!k||!k.dob)return 0;return(Date.now()-new Date(k.dob))/(1000*60*60*24*7);}
+function getWW(w){return WAKE_WINDOWS.find(function(x){return w>=x.minW&&w<x.maxW;})||WAKE_WINDOWS[WAKE_WINDOWS.length-1];}
+function getCurrentLeap(w){return LEAPS.find(function(l){return w>=l.s-1&&w<=l.e+1.5;});}
+function getUpcomingLeap(w){return LEAPS.find(function(l){return l.s>w&&l.s-w<=3;});}
+function formatAge(w){
+  if(w<4)return Math.round(w*7)+' days old';
+  if(w<13)return Math.floor(w)+' weeks old';
+  var m=w/4.33;
+  if(w<54)return Math.floor(m)+' months, '+Math.floor(w%4.33)+' weeks';
+  return Math.floor(m/12)+'y '+Math.floor(m%12)+'m';
+}
+function timeSince(iso){
+  if(!iso)return '-';
+  var mins=Math.round((Date.now()-new Date(iso))/60000);
+  if(mins<1)return 'just now';
+  if(mins<60)return mins+'m ago';
+  return (mins/60).toFixed(1)+'h ago';
+}
+function toAMPM(t){
+  var h=Math.floor(t/60)%24,m=t%60,ap=h<12?'AM':'PM';
+  if(h===0)h=12;else if(h>12)h-=12;
+  return h+':'+(m<10?'0':'')+m+' '+ap;
+}
+function lastLog(type){return(kid().logs||[]).find(function(l){return l.type===type;});}
+function logIcon(t){return{feed:'🍼',sleep:'😴',wake:'☀️',diaper:'💧',note:'📝'}[t]||'📌';}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function getColor(id){return KID_COLORS.find(function(c){return c.id===id;})||KID_COLORS[0];}
+function applyTheme(colorId){
+  var c=getColor(colorId);
+  var r=document.documentElement.style;
+  Object.keys(c.vars).forEach(function(k){r.setProperty(k,c.vars[k]);});
+}
+
+async function addLog(type,detail){
+  if(!kid().logs)kid().logs=[];
+  var entry={id:Date.now(),type:type,detail:detail||'',time:new Date().toISOString()};
+  kid().logs.unshift(entry);
+  kid().logs=kid().logs.slice(0,150);
+  saveLocal();
+  renderDashboard();
+  if(appState.currentTab==='log')renderLog();
+  // Push to cloud in background
+  try{await pushLog(kid().id,entry);}catch(e){console.log('Log sync error',e);}
+}
+
+// COLOR PICKERS
+var setupColor='green',addKidColor='sky',settingsColor='green';
+function renderColorPicker(containerId,selectedId){
+  var el=document.getElementById(containerId);
+  el.innerHTML=KID_COLORS.map(function(c){
+    return '<div class="color-dot'+(c.id===selectedId?' selected':'')+'" style="background:'+c.vars['--accent']+'" title="'+c.label+'" onclick="pickColor(\''+containerId+'\',\''+c.id+'\')"></div>';
+  }).join('');
+}
+function pickColor(containerId,colorId){
+  var el=document.getElementById(containerId);
+  el.querySelectorAll('.color-dot').forEach(function(d){d.classList.toggle('selected',d.title===getColor(colorId).label);});
+  if(containerId==='setup-colors')setupColor=colorId;
+  if(containerId==='addkid-colors')addKidColor=colorId;
+  if(containerId==='settings-colors'){settingsColor=colorId;applyTheme(colorId);}
+}
+
+async function completeSetup(e){
+  e.preventDefault();
+  var name=document.getElementById('s-name').value.trim();
+  var dob=document.getElementById('s-dob').value;
+  var key=document.getElementById('s-key').value.trim();
+  if(!dob||!key)return;
+  appState.apiKey=key;
+  var kidId='kid_'+Date.now();
+  var newKid={id:kidId,name:name,dob:dob,color:setupColor,logs:[],chatHistory:[]};
+  appState.kids=[newKid];
+  appState.activeKid=0;
+  saveLocal();
+  // Push to Supabase
+  try{await pushKid(newKid);}catch(e){console.log('Setup sync error',e);}
+  bootApp();
+}
+
+function bootApp(){
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='flex';
+  applyTheme(kid().color||'green');
+  renderKidBar();updateHeader();setTab('dashboard');showInstallBanner();
+  // Sync from cloud immediately, then every 30 seconds
+  syncFromCloud();
+  setInterval(function(){syncFromCloud();},30000);
+}
+
+function renderKidBar(){
+  var bar=document.getElementById('kid-tabs');
+  bar.innerHTML=appState.kids.map(function(k,i){
+    return '<button class="kid-tab'+(i===appState.activeKid?' active':'')+'" onclick="switchKid('+i+')">'+(k.name||'Baby '+(i+1))+'</button>';
+  }).join('');
+  if(appState.kids.length<4)bar.innerHTML+='<button class="kid-tab-add" onclick="openAddKid()" title="Add child">&#65291;</button>';
+}
+
+function switchKid(idx){
+  appState.activeKid=idx;saveState();
+  applyTheme(kid().color||'green');renderKidBar();updateHeader();renderDashboard();
+  if(appState.currentTab==='log')renderLog();
+  if(appState.currentTab==='leaps')renderLeaps();
+  if(appState.currentTab==='schedule')renderSchedule();
+  if(appState.currentTab==='chat')reloadChat();
+}
+
+function updateHeader(){
+  var k=kid(),w=getWeeks(k);
+  document.getElementById('h-name').textContent=k.name||'Baby';
+  document.getElementById('h-age').textContent=w>0?formatAge(w):'';
+  var leap=getCurrentLeap(w),badge=document.getElementById('leap-badge');
+  if(leap){badge.style.display='';badge.textContent='⚡ Leap '+leap.n;}else badge.style.display='none';
+}
+
+function setTab(id){
+  appState.currentTab=id;
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('active',t.dataset.tab===id);});
+  ['dashboard','log','leaps','schedule','potty','chat'].forEach(function(t){
+    var el=document.getElementById('tab-'+t);
+    el.style.display=t===id?(t==='chat'?'flex':'block'):'none';
+  });
+  if(id==='dashboard')renderDashboard();
+  if(id==='log')renderLog();
+  if(id==='leaps')renderLeaps();
+  if(id==='schedule')renderSchedule();
+  if(id==='potty')renderPotty();
+  if(id==='chat'){reloadChat();setTimeout(function(){scrollChat();},100);}
+}
+
+function isToddler(k){ var m=(getWeeks(k)||0)/4.33; return m>=18; }
+
+function renderDashboard(){
+  var k=kid(),w=getWeeks(k);
+  if(isToddler(k)){ renderToddlerDashboard(k,w); return; }
+  renderInfantDashboard(k,w);
+}
+
+function renderInfantDashboard(k,w){
+  var ww=getWW(w),leap=getCurrentLeap(w),upcoming=getUpcomingLeap(w);
+  var html='';
+  if(leap){
+    html+='<div class="card card-accent"><div class="leap-header"><span class="leap-pill">Leap '+leap.n+'</span><span class="leap-title">'+leap.name+'</span></div>';
+    html+='<div class="leap-tip">&#128161; '+leap.tip+'</div>';
+    html+='<div class="two-col"><div><div class="section-label">Skills emerging</div>'+leap.skills.map(function(s){return'<div class="chip">&#10022; '+s+'</div>';}).join('')+'</div>';
+    html+='<div><div class="section-label">Storm signs</div>'+leap.storm.map(function(s){return'<div class="chip">&#9729; '+s+'</div>';}).join('')+'</div></div>';
+    html+='<div style="margin-top:10px;font-size:12px;color:#555;line-height:1.5;background:rgba(255,255,255,0.55);border-radius:8px;padding:8px"><strong>MOC:</strong> '+leap.mocNote+'</div></div>';
+  } else if(upcoming){
+    var days=Math.round((upcoming.s-w)*7);
+    html+='<div class="card card-amber"><div class="leap-header"><span class="leap-pill amber">Upcoming</span><span class="leap-title">Leap '+upcoming.n+' in ~'+days+' days</span></div>';
+    html+='<div class="leap-tip">&#128197; '+upcoming.name+' — fussiness may start soon. Totally normal.</div></div>';
+  }
+  html+='<div class="stats-grid">';
+  html+='<div class="stat-card"><div class="stat-icon">&#128564;</div><div class="stat-val">'+timeSince(lastLog('sleep')&&lastLog('sleep').time)+'</div><div class="stat-lbl">Last sleep</div></div>';
+  html+='<div class="stat-card"><div class="stat-icon">&#127868;</div><div class="stat-val">'+timeSince(lastLog('feed')&&lastLog('feed').time)+'</div><div class="stat-lbl">Last feed</div></div>';
+  html+='<div class="stat-card"><div class="stat-icon">&#128167;</div><div class="stat-val">'+timeSince(lastLog('diaper')&&lastLog('diaper').time)+'</div><div class="stat-lbl">Last diaper</div></div>';
+  html+='<div class="stat-card"><div class="stat-icon">&#9201;</div><div class="stat-val">'+ww.label+'</div><div class="stat-lbl">Wake window</div></div></div>';
+  html+='<div class="card"><div class="section-label">Quick log</div><div class="quick-btns">';
+  html+='<button class="quick-btn" style="background:#a8d8ea" onclick="addLog(\'feed\')">&#127868;<span>Feed</span></button>';
+  html+='<button class="quick-btn" style="background:#b8b3e9" onclick="addLog(\'sleep\')">&#128564;<span>Sleep</span></button>';
+  html+='<button class="quick-btn" style="background:#ffd6a5" onclick="addLog(\'wake\')">&#9728;&#65039;<span>Wake</span></button>';
+  html+='<button class="quick-btn" style="background:#c9e8c9" onclick="addLog(\'diaper\')">&#128167;<span>Diaper</span></button></div></div>';
+  var logs=k.logs||[];
+  if(logs.length>0){
+    html+='<div class="card"><div class="section-label">Recent activity</div>';
+    html+=logs.slice(0,5).map(function(l){return'<div class="log-row"><span style="font-size:16px">'+logIcon(l.type)+'</span><span class="log-type">'+l.type+'</span>'+(l.detail?'<span class="log-detail">'+l.detail+'</span>':'<span class="log-detail"></span>')+'<span class="log-time">'+timeSince(l.time)+'</span></div>';}).join('');
+    html+='</div>';
+  }
+  document.getElementById('tab-dashboard').innerHTML=html;
+}
+
+function getTodayLogs(k,type){
+  var today=new Date().toDateString();
+  return(k.logs||[]).filter(function(l){return l.type===type&&new Date(l.time).toDateString()===today;});
+}
+function getMoodEmoji(m){ return{great:'😄',good:'🙂',meh:'😐',rough:'😤',big_feelings:'😭'}[m]||'🙂'; }
+function getMoodLabel(m){ return{great:'Great day',good:'Good day',meh:'So-so',rough:'Rough day',big_feelings:'Big feelings'}[m]||m; }
+
+function renderToddlerDashboard(k,w){
+  var months=w/4.33;
+  var html='';
+
+  // Toddler header card
+  var todayMood=getTodayLogs(k,'mood')[0];
+  var pottySuccess=getTodayLogs(k,'potty_success').length;
+  var pottyAccident=getTodayLogs(k,'potty_accident').length;
+  var lastSleep=lastLog('sleep');
+  var lastWake=lastLog('wake');
+
+  // Age + milestone banner
+  var monthsToThird=Math.round((36-months)*4.33/4.33*10)/10;
+  html+='<div class="card card-accent" style="margin-bottom:12px">';
+  html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+  html+='<div><div style="font-family:Lora,serif;font-weight:600;font-size:16px;color:var(--accent-dark)">'+( k.name||'Your toddler')+'</div>';
+  html+='<div style="font-size:12px;color:var(--text-soft);margin-top:2px">'+formatAge(w)+(monthsToThird>0?' · 3rd birthday in ~'+Math.round(monthsToThird)+' months':'')+'</div></div>';
+  html+='<div style="font-size:36px">'+(todayMood?getMoodEmoji(todayMood.detail):'🌤️')+'</div></div>';
+  if(todayMood) html+='<div style="font-size:12px;color:var(--text-mid);margin-top:6px;font-style:italic">Today: '+getMoodLabel(todayMood.detail)+(todayMood.note?' — '+todayMood.note:'')+'</div>';
+  html+='</div>';
+
+  // Today's stats grid — toddler version
+  html+='<div class="stats-grid">';
+  html+='<div class="stat-card"><div class="stat-icon">🚽</div><div class="stat-val" style="color:#2d6a4f">'+pottySuccess+'</div><div class="stat-lbl">Potty wins today</div></div>';
+  html+='<div class="stat-card"><div class="stat-icon">💦</div><div class="stat-val" style="color:'+(pottyAccident>2?'#c0526a':'#555')+'">'+pottyAccident+'</div><div class="stat-lbl">Accidents today</div></div>';
+  html+='<div class="stat-card"><div class="stat-icon">&#128564;</div><div class="stat-val">'+timeSince(lastSleep&&lastSleep.time)+'</div><div class="stat-lbl">Bedtime</div></div>';
+  html+='<div class="stat-card"><div class="stat-icon">&#9728;&#65039;</div><div class="stat-val">'+timeSince(lastWake&&lastWake.time)+'</div><div class="stat-lbl">Woke up</div></div>';
+  html+='</div>';
+
+  // Quick log — toddler version
+  html+='<div class="card">';
+  html+='<div class="section-label">Quick log</div>';
+  html+='<div class="quick-btns" style="margin-bottom:8px">';
+  html+='<button class="quick-btn" style="background:#c9e8c9" onclick="addLog(\'potty_success\',\'\')" title="Potty success">🚽<span>Potty ✓</span></button>';
+  html+='<button class="quick-btn" style="background:#fde8ec" onclick="addLog(\'potty_accident\',\'\')" title="Accident">💦<span>Accident</span></button>';
+  html+='<button class="quick-btn" style="background:#b8b3e9" onclick="addLog(\'sleep\',\'\')" title="Bedtime">&#128564;<span>Bedtime</span></button>';
+  html+='<button class="quick-btn" style="background:#ffd6a5" onclick="addLog(\'wake\',\'\')" title="Wake up">&#9728;&#65039;<span>Wake</span></button>';
+  html+='</div>';
+  // Mood row
+  html+='<div class="section-label" style="margin-top:4px">How\'s the day going?</div>';
+  html+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">';
+  [{id:'great',e:'😄'},{id:'good',e:'🙂'},{id:'meh',e:'😐'},{id:'rough',e:'😤'},{id:'big_feelings',e:'😭'}].forEach(function(m){
+    html+='<button onclick="addLog(\'mood\',\''+m.id+'\')" style="border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;background:white;cursor:pointer;font-size:20px;transition:all 0.15s" title="'+getMoodLabel(m.id)+'">'+m.e+'</button>';
+  });
+  html+='</div></div>';
+
+  // Potty streak
+  var streak=getPottyStreak(k);
+  if(streak>0){
+    html+='<div class="card card-accent"><div style="display:flex;align-items:center;gap:10px">';
+    html+='<div style="font-size:32px">🔥</div>';
+    html+='<div><div style="font-weight:700;font-size:15px;color:var(--accent-dark)">'+streak+'-day potty streak!</div>';
+    html+='<div style="font-size:12px;color:var(--text-soft);margin-top:2px">More successes than accidents '+streak+' day'+(streak>1?'s':'')+' in a row</div></div></div></div>';
+  }
+
+  // Toddler milestones for ~2.5-3yr
+  html+='<div class="card"><div class="section-label">What\'s happening at '+Math.floor(months)+' months</div>';
+  var milestones=getToddlerMilestones(months);
+  html+=milestones.map(function(m){return'<div style="display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f5f0ea"><span style="font-size:18px;flex-shrink:0">'+m.icon+'</span><div><div style="font-weight:600;font-size:13px">'+m.title+'</div><div style="font-size:12px;color:var(--text-soft);margin-top:2px;line-height:1.4">'+m.desc+'</div></div></div>';}).join('');
+  html+='</div>';
+
+  // Today's behavior tip
+  html+='<div class="card card-amber"><div class="section-label">Today\'s parenting tip</div>';
+  var tips=getDailyToddlerTip(k);
+  html+='<div style="font-size:13px;color:var(--text-mid);line-height:1.6">'+tips+'</div>';
+  html+='<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">';
+  html+='<button class="sugg-btn" onclick="setInput(\'Ari is having a big meltdown right now, what do I do?\')">🌊 Meltdown help</button>';
+  html+='<button class="sugg-btn" onclick="setInput(\'Give me a potty training pep talk for today\')">🚽 Potty pep talk</button>';
+  html+='<button class="sugg-btn" onclick="setInput(\'How do I handle sibling jealousy with a toddler?\')">👶 Sibling help</button>';
+  html+='</div></div>';
+
+  // Recent logs
+  var logs=k.logs||[];
+  if(logs.length>0){
+    html+='<div class="card"><div class="section-label">Recent activity</div>';
+    html+=logs.slice(0,6).map(function(l){
+      var icon={potty_success:'🚽',potty_accident:'💦',mood:'',sleep:'&#128564;',wake:'&#9728;&#65039;',note:'&#128221;'}[l.type]||'📌';
+      var label=l.type==='mood'?getMoodEmoji(l.detail)+' '+getMoodLabel(l.detail):l.type.replace('_',' ');
+      return'<div class="log-row"><span style="font-size:16px">'+icon+'</span><span class="log-type">'+label+'</span><span class="log-time">'+timeSince(l.time)+'</span></div>';
+    }).join('');
+    html+='</div>';
+  }
+
+  document.getElementById('tab-dashboard').innerHTML=html;
+}
+
+function getPottyStreak(k){
+  var streak=0;
+  var d=new Date(); d.setHours(0,0,0,0);
+  for(var i=0;i<14;i++){
+    var dayStr=new Date(d.getTime()-i*86400000).toDateString();
+    var wins=(k.logs||[]).filter(function(l){return l.type==='potty_success'&&new Date(l.time).toDateString()===dayStr;}).length;
+    var acc=(k.logs||[]).filter(function(l){return l.type==='potty_accident'&&new Date(l.time).toDateString()===dayStr;}).length;
+    if(wins>acc) streak++; else if(i>0) break;
+  }
+  return streak;
+}
+
+function getToddlerMilestones(months){
+  if(months>=30&&months<36) return[
+    {icon:'🗣️',title:'Language explosion',desc:'2-3 word sentences expanding to 4-5 words. Should have 200+ words. Strangers should understand ~75% of speech.'},
+    {icon:'🎭',title:'Pretend play is rich',desc:'Full scenarios with dolls, kitchen play, "going to work." This is peak imaginative development.'},
+    {icon:'🧩',title:'Problem solving',desc:'Can work simple puzzles (6-8 pieces), sort by color and shape, understand "more" and "less."'},
+    {icon:'👫',title:'Parallel → cooperative play',desc:'Starting to actually play WITH other kids, not just near them. Friendships becoming meaningful.'},
+    {icon:'😤',title:'Strong sense of self',desc:'\"Mine,\" \"me do it,\" testing limits constantly — all healthy autonomy development. Frustrating but normal.'},
+    {icon:'🏃',title:'Physical skills',desc:'Runs, jumps, climbs confidently. Can kick a ball, walk up stairs alternating feet. Fine motor improving rapidly.'},
+  ];
+  return[
+    {icon:'🗣️',title:'Vocabulary growing fast',desc:'Should have 50+ words and be combining 2 words. Points to name things in books.'},
+    {icon:'🎭',title:'Imaginative play beginning',desc:'Feeding dolls, pretend phone calls, simple role play. Encourage and join in.'},
+    {icon:'😤',title:'Tantrums are peak',desc:'18-24 months is the hardest for tantrums — their wants exceed their words. Totally normal.'},
+    {icon:'🚶',title:'Physical independence',desc:'Running, climbing, exploring. Needs safe environment to practice without constant "no."'},
+  ];
+}
+
+function getDailyToddlerTip(k){
+  var tips=[
+    '<strong>MOC on discipline:</strong> State the rule once, follow through immediately, keep emotion neutral. "We don\'t hit. You\'re going to sit here for 2 minutes." Then it\'s done — no lectures.',
+    '<strong>Oster on tantrums:</strong> The prefrontal cortex (logic) is offline during a meltdown. Don\'t reason. Get low, stay calm, offer a hug when the wave passes. Works better than any words.',
+    '<strong>Preschool readiness:</strong> The #1 skill preschools want isn\'t academic — it\'s the ability to separate from parents calmly and follow 2-step instructions. Practice both.',
+    '<strong>Sibling tip:</strong> Give the older child a "big kid job" with the baby — fetching a diaper, singing a song. Involvement beats competition.',
+    '<strong>MOC on bedtime:</strong> At this age, one firm warning ("5 more minutes, then lights out") followed by a consistent routine beats negotiating every night. They test because they\'re wired to — hold the line kindly.',
+    '<strong>Language boost:</strong> Ask "what happened next?" and "why do you think?" instead of yes/no questions. Narrative conversation is the fastest way to build language and emotional intelligence.',
+    '<strong>Oster on screen time:</strong> Co-viewing quality content (PBS, Bluey) and talking about what you see together has actual developmental value. Passive solo screen time doesn\'t.',
+  ];
+  var idx=new Date().getDate()%tips.length;
+  return tips[idx];
+}
+
+function renderLog(){
+  var k=kid();
+  if(isToddler(k)){ renderToddlerLog(k); return; }
+  renderInfantLog(k);
+}
+
+function renderToddlerLog(k){
+  var html='';
+  // Quick tap log entries for toddler
+  var entries=[
+    {type:'potty_success',icon:'🚽',label:'Potty ✓',color:'#c9e8c9'},
+    {type:'potty_accident',icon:'💦',label:'Accident',color:'#fde8ec'},
+    {type:'sleep',icon:'&#128564;',label:'Bedtime',color:'#b8b3e9'},
+    {type:'wake',icon:'&#9728;&#65039;',label:'Wake up',color:'#ffd6a5'},
+    {type:'note',icon:'&#128221;',label:'Note',color:'#f0e0c8'},
+  ];
+  html+=entries.map(function(e){return'<div class="log-entry" style="border-left-color:'+e.color+'"><span class="log-entry-icon">'+e.icon+'</span><span class="log-entry-label">'+e.label+'</span><input id="inp-'+e.type+'" placeholder="Notes&hellip;" onkeydown="if(event.key===\'Enter\')logFromEntry(\''+e.type+'\')"><button class="log-entry-btn" style="background:'+e.color+'" onclick="logFromEntry(\''+e.type+'\')">Log</button></div>';}).join('');
+
+  // Mood log
+  html+='<div class="card" style="margin-bottom:10px"><div class="section-label">Mood / behavior</div>';
+  html+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">';
+  [{id:'great',e:'😄',l:'Great'},{id:'good',e:'🙂',l:'Good'},{id:'meh',e:'😐',l:'So-so'},{id:'rough',e:'😤',l:'Rough'},{id:'big_feelings',e:'😭',l:'Big feelings'}].forEach(function(m){
+    html+='<button onclick="addLog(\'mood\',\''+m.id+'\')" style="display:flex;flex-direction:column;align-items:center;border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;background:white;cursor:pointer;gap:3px;font-size:11px;color:var(--text-soft)"><span style="font-size:22px">'+m.e+'</span>'+m.l+'</button>';
+  });
+  html+='</div></div>';
+
+  // Potty summary today
+  var today=new Date().toDateString();
+  var wins=(k.logs||[]).filter(function(l){return l.type==='potty_success'&&new Date(l.time).toDateString()===today;}).length;
+  var acc=(k.logs||[]).filter(function(l){return l.type==='potty_accident'&&new Date(l.time).toDateString()===today;}).length;
+  html+='<div class="card" style="margin-bottom:10px"><div class="section-label">Today\'s potty summary</div>';
+  html+='<div style="display:flex;gap:16px;margin-top:8px">';
+  html+='<div style="text-align:center;flex:1"><div style="font-size:28px;font-family:Lora,serif;font-weight:600;color:var(--accent)">'+wins+'</div><div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.6px">Successes</div></div>';
+  html+='<div style="text-align:center;flex:1"><div style="font-size:28px;font-family:Lora,serif;font-weight:600;color:'+(acc>2?'#c0526a':'#888')+'">'+acc+'</div><div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.6px">Accidents</div></div>';
+  html+='<div style="text-align:center;flex:1"><div style="font-size:28px;font-family:Lora,serif;font-weight:600;color:#555">'+(wins+acc>0?Math.round(wins/(wins+acc)*100)+'%':'—')+'</div><div style="font-size:11px;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.6px">Success rate</div></div>';
+  html+='</div></div>';
+
+  html+='<div class="section-label" style="margin-top:4px">History</div>';
+  var logs=k.logs||[];
+  if(!logs.length) html+='<div class="empty-state">No logs yet!</div>';
+  else html+=logs.map(function(l){
+    var icon={potty_success:'🚽',potty_accident:'💦',mood:'',sleep:'&#128564;',wake:'&#9728;&#65039;',note:'&#128221;'}[l.type]||'📌';
+    var label=l.type==='mood'?getMoodEmoji(l.detail)+' '+getMoodLabel(l.detail):l.type.replace(/_/g,' ');
+    return'<div class="log-row"><span style="font-size:16px">'+icon+'</span><span class="log-type">'+label+'</span>'+(l.detail&&l.type!=='mood'?'<span class="log-detail">'+l.detail+'</span>':'<span class="log-detail"></span>')+'<span class="log-time">'+new Date(l.time).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span><button class="del-btn" onclick="deleteLog('+l.id+')">&times;</button></div>';
+  }).join('');
+  document.getElementById('tab-log').innerHTML=html;
+}
+
+function renderInfantLog(k){
+  var entries=[{type:'feed',icon:'&#127868;',label:'Feed',color:'#a8d8ea'},{type:'sleep',icon:'&#128564;',label:'Sleep start',color:'#b8b3e9'},{type:'wake',icon:'&#9728;&#65039;',label:'Wake up',color:'#ffd6a5'},{type:'diaper',icon:'&#128167;',label:'Diaper',color:'#c9e8c9'},{type:'note',icon:'&#128221;',label:'Note',color:'#f0e0c8'}];
+  var html=entries.map(function(e){return'<div class="log-entry" style="border-left-color:'+e.color+'"><span class="log-entry-icon">'+e.icon+'</span><span class="log-entry-label">'+e.label+'</span><input id="inp-'+e.type+'" placeholder="Notes&hellip;" onkeydown="if(event.key===\'Enter\')logFromEntry(\''+e.type+'\')"><button class="log-entry-btn" style="background:'+e.color+'" onclick="logFromEntry(\''+e.type+'\')">Log</button></div>';}).join('');
+  html+='<div class="section-label" style="margin-top:8px">History</div>';
+  var logs=k.logs||[];
+  if(!logs.length)html+='<div class="empty-state">No logs yet!</div>';
+  else html+=logs.map(function(l){return'<div class="log-row"><span style="font-size:16px">'+logIcon(l.type)+'</span><span class="log-type">'+l.type+'</span>'+(l.detail?'<span class="log-detail">'+l.detail+'</span>':'<span class="log-detail"></span>')+'<span class="log-time">'+new Date(l.time).toLocaleString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+'</span><button class="del-btn" onclick="deleteLog('+l.id+')">&times;</button></div>';}).join('');
+  document.getElementById('tab-log').innerHTML=html;
+}
+function logFromEntry(type){var inp=document.getElementById('inp-'+type);addLog(type,inp?inp.value.trim():'');if(inp)inp.value='';}
+function deleteLog(id){kid().logs=(kid().logs||[]).filter(function(l){return l.id!==id;});saveState();renderLog();renderDashboard();}
+
+function renderLeaps(){
+  var w=getWeeks(kid());
+  var html='<p style="color:#888;font-size:12.5px;line-height:1.6;margin-bottom:14px">Wonder Weeks leaps happen at predictable times. Each one temporarily makes babies fussier as their brains rewire to perceive the world in a new way.</p>';
+  html+=LEAPS.map(function(l){
+    var isActive=w>=l.s-1&&w<=l.e+1.5,isPast=w>l.e+1.5,wUntil=l.s-w;
+    var pillCls=isActive?'':(isPast?'gray':'amber');
+    var pillTxt=isActive?'NOW':(isPast?'done':(wUntil<10?'~'+Math.round(wUntil)+'w away':'wk '+l.s));
+    var inner='<div style="display:flex;align-items:center;gap:8px"><span class="leap-pill '+pillCls+'">'+pillTxt+'</span><strong style="font-size:13.5px">Leap '+l.n+': '+l.name+'</strong></div>';
+    inner+='<div style="font-size:11px;color:#888;margin-top:3px">Weeks '+l.s+'-'+l.e+'</div>';
+    if(isActive){
+      inner+='<div class="leap-tip" style="margin-top:8px">&#128161; '+l.tip+'</div>';
+      inner+='<div class="two-col"><div><div class="section-label">Skills</div>'+l.skills.map(function(s){return'<div class="chip">&#10022; '+s+'</div>';}).join('')+'</div><div><div class="section-label">Storm signs</div>'+l.storm.map(function(s){return'<div class="chip">&#9729; '+s+'</div>';}).join('')+'</div></div>';
+      inner+='<div style="margin-top:8px;font-size:12px;color:#555;line-height:1.5;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px"><strong>MOC:</strong> '+l.mocNote+'</div>';
+      inner+='<div style="margin-top:6px;font-size:12px;color:#555;line-height:1.5;background:rgba(255,255,255,0.6);border-radius:8px;padding:8px"><strong>Oster:</strong> '+l.osterNote+'</div>';
+    }
+    return'<div class="leap-list-card'+(isActive?' active':(isPast?' past':''))+'">'+inner+'</div>';
+  }).join('');
+  document.getElementById('tab-leaps').innerHTML=html;
+}
+
+function renderSchedule(){
+  var k=kid(),w=getWeeks(k),ww=getWW(w),leap=getCurrentLeap(w);
+  var t=7*60,items=[];
+  items.push({t:t,icon:'&#9728;&#65039;&#127868;',label:'Wake & feed'});
+  var napsLeft=ww.naps;
+  while(napsLeft>0&&t<18*60){t+=ww.wMax;if(t>=18*60)break;items.push({t:t,icon:'&#128564;',label:'Nap '+(ww.naps-napsLeft+1)});t+=(napsLeft===1?45:90);items.push({t:t,icon:'&#9728;&#65039;',label:'Wake'});if(t<17*60)items.push({t:t+5,icon:'&#127868;',label:'Feed'});napsLeft--;}
+  items.push({t:18.5*60,icon:'&#128705;&#128218;',label:'Bath + book routine'});
+  items.push({t:19*60,icon:'&#127769;',label:'Bedtime'});
+  var html='<div class="card" style="margin-bottom:12px"><div class="section-label">Moms on Call &middot; '+formatAge(w)+'</div><div style="font-weight:600;color:var(--accent);margin-top:4px">'+ww.label+' wake windows &middot; feed every ~'+ww.feed+'h &middot; ~'+ww.sleep+'h total sleep</div></div>';
+  html+='<div class="card" style="margin-bottom:12px">'+items.map(function(i){return'<div class="sched-item"><span class="sched-time">'+toAMPM(i.t)+'</span><span style="font-size:16px;flex:0 0 24px">'+i.icon+'</span><span>'+i.label+'</span></div>';}).join('')+'</div>';
+  html+='<div class="sched-note"><strong>&#128214; Emily Oster:</strong> Schedules are guidelines, not laws. Watch for sleepy cues - yawning, eye rubbing, staring into space. Well-rested babies learn better, but rigid clock-watching increases parental anxiety.</div>';
+  html+='<div class="sched-note"><strong>&#128214; MOC bedtime:</strong> Pick 3-4 consistent steps in the SAME order every night (bath, lotion, feed, song). Consistency signals sleep is coming. Most parents see improvement within 3-5 days.</div>';
+  if(leap)html+='<div class="sched-note green"><strong>&#9889; Leap '+leap.n+':</strong> '+(k.name||'Baby')+' may resist naps and wake early. Maintain structure anyway - familiarity is comforting when everything feels new.</div>';
+  document.getElementById('tab-schedule').innerHTML=html;
+}
+
+function renderPotty(){
+  var k=kid(),w=getWeeks(k),months=w/4.33;
+  var isPottyAge=months>=18;
+  var html='';
+
+  // Readiness checker
+  html+='<div class="card card-accent"><div class="leap-header"><span class="leap-pill">🚽 Potty Training</span></div>';
+  html+='<div style="font-size:13px;color:var(--text-mid);line-height:1.6;margin-top:4px">Based on Moms on Call &amp; Emily Oster\'s evidence-based guidance.</div>';
+  if(!isPottyAge){
+    html+='<div class="leap-tip" style="margin-top:8px">⏳ '+(k.name||'Baby')+' is '+formatAge(w)+'. Most readiness signs appear between 18–36 months. Check back soon — this guide will be here when the time comes!</div>';
+  }
+  html+='</div>';
+
+  // Readiness signs
+  html+='<div class="card"><div class="section-label">Readiness signs (look for most of these)</div>';
+  var signs=[
+    {icon:'🧠',title:'Knows wet/dirty feeling',desc:'Child notices and tells you when diaper is wet or soiled, or right after it happens.'},
+    {icon:'🚶',title:'Can walk to potty independently',desc:'Physical ability to get to the bathroom and pull pants down without help.'},
+    {icon:'⏱',title:'Stays dry 1-2 hours',desc:'Bladder control is developing — dry stretches during the day mean the muscles are ready.'},
+    {icon:'💬',title:'Communicates the need',desc:'Uses words, signs, or clear signals to indicate needing to go — or shows interest when others use the bathroom.'},
+    {icon:'🎯',title:'Follows 2-step instructions',desc:'Can understand "go get your shoes and bring them here" — needed to follow potty steps.'},
+    {icon:'😤',title:'Shows independence',desc:'Says "me do it" or wants to do things themselves. This drive is your greatest ally in training.'},
+    {icon:'🌙',title:'Dry after naps (optional)',desc:'Not required to start, but dry naps suggest nighttime training may follow naturally.'},
+  ];
+  html+=signs.map(function(s){return'<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f5f0ea"><span style="font-size:20px;flex-shrink:0">'+s.icon+'</span><div><div style="font-weight:600;font-size:13px">'+s.title+'</div><div style="font-size:12px;color:var(--text-soft);margin-top:2px;line-height:1.4">'+s.desc+'</div></div></div>';}).join('');
+  html+='</div>';
+
+  // MOC Method
+  html+='<div class="card"><div class="section-label">Moms on Call — 3-Day Method</div>';
+  var mocSteps=[
+    {day:'Before Day 1',icon:'🛒',title:'Prepare',steps:['Buy a small standalone potty AND a seat insert for the big toilet (let child choose if possible)','Stock up: 20+ pairs of underwear, sticker chart, small treats/rewards','Read potty books together for 1-2 weeks before: "Everyone Poops," "Potty" by Leslie Patricelli','Tell child: "This weekend we\'re saying bye-bye to diapers. Big kid undies!" Build excitement, not anxiety.','Clear your schedule — commit fully for 3 days at home.']},
+    {day:'Day 1',icon:'🌅',title:'Underwear from the start',steps:['Put child in underwear first thing in the morning — no diapers except nap and bedtime at first','Every 30 minutes say "let\'s try the potty" — keep it casual and positive, not urgent','When they go in underwear: calm, neutral response — "Uh oh, pee goes in the potty. Let\'s try next time."','When they go in potty: CELEBRATE. Sticker, small treat, happy dance — whatever they love.','Watch for the "potty dance" (squirming, grabbing, going still) — those are your cues to prompt immediately.','Keep them in easy pull-on pants or bare-bottomed at home — reduces barrier to getting there in time.']},
+    {day:'Day 2',icon:'☀️',title:'Stretch intervals',steps:['Extend prompts to every 45-60 minutes instead of every 30','Child should be having more successes than accidents — if not, return to every 30 min','Practice pulling pants up and down themselves — this is a key skill.','Introduce sitting on potty BEFORE meals (natural body timing)','If child is resistant: don\'t force. Sit for 2 minutes max, then move on. Never make the potty a battle.']},
+    {day:'Day 3',icon:'🌟',title:'Child-initiated',steps:['Begin waiting for THEM to tell you instead of you always prompting','Offer reminder once per hour, but aim for child to initiate','Short outing test: put underwear on, go somewhere 20-30 min away, ask before you leave and when you arrive.','Have a portable travel potty or foldable seat insert in your bag.','Celebrate every initiation more than prompted trips — self-initiation is the goal.']},
+    {day:'Week 2+',icon:'🏆',title:'Consolidation',steps:['Nap training: put in underwear for naps once daytime is consistent (1-2 weeks of dry days)','Night training: typically follows in weeks to months on its own — don\'t rush it','Poop often lags behind pee by 1-4 weeks — completely normal','If consistent accidents return after success: check for illness, stress (new sibling, move), or developmental leap','MOC: Do NOT go back to diapers during the day once you\'ve started — confuses the child. Commit fully.']},
+  ];
+  html+=mocSteps.map(function(s){
+    return'<div style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:18px">'+s.icon+'</span><div><div style="font-weight:700;font-size:13px;color:var(--accent-dark)">'+s.day+': '+s.title+'</div></div></div>'+
+    s.steps.map(function(st){return'<div style="display:flex;gap:8px;margin-bottom:5px;padding-left:4px"><span style="color:var(--accent);flex-shrink:0;font-weight:700">•</span><span style="font-size:12.5px;color:var(--text-mid);line-height:1.5">'+st+'</span></div>';}).join('');
+  }).join('');
+  html+='</div>';
+
+  // Emily Oster section
+  html+='<div class="card"><div class="section-label">Emily Oster — What the evidence says</div>';
+  var osterPoints=[
+    {icon:'📊',title:'Age doesn\'t predict success',desc:'Large studies show children trained earlier (before 27 months) take longer and have more accidents than those trained 27-32 months. Readiness matters more than age.'},
+    {icon:'⏳',title:'Average training age is rising',desc:'In the 1950s children were trained by 18 months. By 2013 it was 36 months. Neither extreme is "right" — follow your child\'s readiness cues.'},
+    {icon:'🧘',title:'Stress causes regression',desc:'New sibling, moving, starting daycare, or even a Wonder Weeks leap can trigger regression. This is normal and temporary. Stay calm and return to basics.'},
+    {icon:'🌙',title:'Night training is biological',desc:'Nighttime dryness requires a hormone (ADH) that many children don\'t produce consistently until 5-7 years old. Bedwetting before age 7 is not a problem — don\'t punish it.'},
+    {icon:'💩',title:'Poop resistance is very common',desc:'Up to 30% of children resist pooping on the potty for weeks or months. Don\'t make it a power struggle. A relaxed approach with time usually resolves it. If constipation is involved, address that medically.'},
+    {icon:'🔄',title:'Accidents are part of the process',desc:'Expect 1-3 accidents per day in the first week. Research shows punishment makes training take longer. Calm, neutral responses preserve the child\'s motivation.'},
+    {icon:'🏫',title:'Daycare coordination matters',desc:'Oster recommends aligning approach with your daycare provider — inconsistency between home and daycare is a top cause of extended training.'},
+  ];
+  html+=osterPoints.map(function(p){return'<div style="display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f5f0ea"><span style="font-size:20px;flex-shrink:0">'+p.icon+'</span><div><div style="font-weight:600;font-size:13px">'+p.title+'</div><div style="font-size:12px;color:var(--text-soft);margin-top:2px;line-height:1.4">'+p.desc+'</div></div></div>';}).join('');
+  html+='</div>';
+
+  // Regression section
+  html+='<div class="card card-amber"><div class="section-label">Handling regression</div>';
+  html+='<div style="font-size:13px;color:var(--text-mid);line-height:1.6">Regression after success is extremely common and almost always temporary. Common triggers:</div>';
+  var regressionTips=['New sibling or major life change','Starting preschool or daycare change','Illness','Wonder Weeks developmental leap (brain is too busy learning new skills)','Constipation or painful bowel movement created fear'];
+  html+='<div style="margin:10px 0">'+regressionTips.map(function(r){return'<div class="chip" style="margin-bottom:5px">• '+r+'</div>';}).join('')+'</div>';
+  html+='<div style="font-size:12.5px;color:var(--text-mid);line-height:1.6"><strong>What to do:</strong> Return calmly to basics (frequent prompts, praise successes, ignore accidents). Do NOT revert to diapers during the day. Most regressions resolve in 1-2 weeks. If lasting more than a month, mention to pediatrician to rule out physical causes.</div>';
+  html+='</div>';
+
+  // Chat shortcut
+  html+='<div style="text-align:center;padding:8px 0 4px"><button class="sugg-btn" onclick="setInput(\'I need specific potty training advice for \'+(kid().name||\'my child\'))" style="font-size:13px;padding:8px 18px">💬 Ask for personalized help</button></div>';
+
+  document.getElementById('tab-potty').innerHTML=html;
+}
+
+function reloadChat(){
+  var msgs=document.getElementById('chat-msgs');msgs.innerHTML='';
+  var k=kid(),hist=k.chatHistory||[];
+  if(!hist.length){appendBubble('bot','Hi! I\'m your baby companion for '+(k.name||'your little one')+' - drawing on Moms on Call, Emily Oster\'s Cribsheet, and Wonder Weeks.\n\nAsk me anything about sleep, feeding, development, or what to do right now.',false);}
+  else hist.forEach(function(m){appendBubble(m.role==='user'?'user':'bot',m.content,false);});
+  scrollChat();
+}
+function appendBubble(role,text,sv){
+  if(sv===undefined)sv=true;
+  var msgs=document.getElementById('chat-msgs'),wrap=document.createElement('div');
+  wrap.className='bubble '+role;
+  var formatted=text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
+  if(role==='bot')wrap.innerHTML='<div class="bot-avatar">&#127807;</div><div class="bubble-text">'+formatted+'</div>';
+  else wrap.innerHTML='<div class="bubble-text">'+esc(text)+'</div>';
+  msgs.appendChild(wrap);scrollChat();
+  if(sv){
+    if(!kid().chatHistory)kid().chatHistory=[];
+    var msg={role:role==='bot'?'assistant':'user',content:text};
+    kid().chatHistory.push(msg);
+    if(kid().chatHistory.length>30)kid().chatHistory=kid().chatHistory.slice(-30);
+    saveLocal();
+    pushChat(kid().id,msg).catch(function(e){console.log('Chat sync error',e);});
+  }
+}
+function showTyping(){var msgs=document.getElementById('chat-msgs'),el=document.createElement('div');el.className='bubble bot';el.id='typing-indicator';el.innerHTML='<div class="bot-avatar">&#127807;</div><div class="typing-dots"><span></span><span></span><span></span></div>';msgs.appendChild(el);scrollChat();}
+function hideTyping(){var el=document.getElementById('typing-indicator');if(el)el.remove();}
+function scrollChat(){var m=document.getElementById('chat-msgs');m.scrollTop=m.scrollHeight;}
+function setInput(txt){document.getElementById('chat-field').value=txt;setTab('chat');document.getElementById('chat-field').focus();}
+
+async function sendChat(){
+  var field=document.getElementById('chat-field'),text=field.value.trim();
+  if(!text)return;
+  if(!appState.apiKey){alert('Please add your API key in Settings');openSettings();return;}
+  field.value='';document.getElementById('send-btn').disabled=true;
+  appendBubble('user',text);showTyping();
+  var k=kid(),w=getWeeks(k),ww=getWW(w),leap=getCurrentLeap(w),upLeap=getUpcomingLeap(w);
+  var recentLogs=(k.logs||[]).slice(0,8).map(function(l){return l.type+' '+timeSince(l.time)+(l.detail?' ('+l.detail+')':'');}).join(', ');
+  var siblings=appState.kids.filter(function(_,i){return i!==appState.activeKid;});
+  var sibCtx=siblings.map(function(s){var sw=getWeeks(s),sl=getCurrentLeap(sw);return'Sibling: '+(s.name||'other child')+', '+formatAge(sw)+(sl?', in Leap '+sl.n+' "'+sl.name+'"':'');}).join('\n');
+  var leapLines=LEAPS.map(function(l){return'Leap '+l.n+' (wk '+l.s+'-'+l.e+'): "'+l.name+'" | Skills: '+l.skills.join(', ')+' | Storm: '+l.storm.join(', ')+' | MOC: '+l.mocNote+' | Oster: '+l.osterNote;}).join('\n');
+  var isToddlerKid=isToddler(k);
+  var todayMoodLog=getTodayLogs(k,'mood')[0];
+  var todayWins=getTodayLogs(k,'potty_success').length;
+  var todayAcc=getTodayLogs(k,'potty_accident').length;
+  var toddlerCtx=isToddlerKid?'\n\nTODDLER-SPECIFIC CONTEXT for '+( k.name||'this child')+':\nAge: '+formatAge(w)+' ('+Math.floor(w/4.33)+' months)\nCurrently potty training: yes, still in training\nToday potty: '+todayWins+' successes, '+todayAcc+' accidents\nToday mood: '+(todayMoodLog?getMoodLabel(todayMoodLog.detail):'not logged')+'\nPotty streak: '+getPottyStreak(k)+' days\n\nTODDLER GUIDANCE FRAMEWORK:\n\nMOC ON TODDLER DISCIPLINE:\n- State rule once, follow through immediately, neutral emotion. Never repeat the rule 5 times.\n- Time-outs: 1 minute per year of age, in a boring spot, no interaction. Hug after and move on.\n- Bedtime: firm routine, one warning ("5 more minutes"), minimal re-entries. Hold the line kindly.\n- Choices work: "Do you want the red cup or blue cup?" — not "what do you want?"\n- Consistency between caregivers is everything — same rules, same language.\n\nEMILY OSTER ON TODDLERS (THE FAMILY FIRM):\n- Tantrums 18-36mo are neurological — prefrontal cortex is offline. Don\'t reason during. Get low, stay calm, wait for the wave to pass, then connect.\n- Punishment (spanking, yelling) makes behavior worse long-term per RCTs. Calm, consistent consequences work better.\n- Screen time: co-viewing quality content (Bluey, PBS) with conversation has value. Passive solo viewing doesn\'t. Under 2: no screens except video calls.\n- Sleep: 2-3yr olds need 11-14h. Consistent bedtime and wake time matters more than exact hour.\n- Preschool readiness: ability to separate calmly + follow 2-step instructions are the key skills. Academic prep is less important than social-emotional skills.\n\nSIBLING DYNAMICS:\n- Regression in older child after new baby is universal — expect it, don\'t punish it.\n- Give older child a "job" with baby (fetching diapers, singing). Involvement over exclusion.\n- One-on-one time with older child, even 10 min/day, dramatically reduces jealousy behaviors.\n- Name their feelings: "You wish you could have all of mommy\'s attention. That makes sense."\n\nBIG FEELINGS / EMOTIONAL COACHING:\n- Name the emotion out loud: "You\'re so frustrated right now."\n- Validate before redirecting: "I know you really wanted that toy."\n- Problem-solve AFTER the storm, not during.\n- Books about feelings work well at this age: "The Invisible String," "Grumpy Monkey."\n\nPRESCHOOL READINESS (for ~3yr):\n- Can separate from parent without prolonged distress\n- Follows 2-3 step instructions\n- Uses toilet independently (or nearly so)\n- Can play alongside peers\n- Communicates needs with words\n- Sits for a short activity (5-10 min)\n- Not required: reading, numbers, letters — those come later':'';
+  var sys='You are a warm, expert baby and toddler care companion drawing on these frameworks:\n\nMOMS ON CALL (MOC): Schedule-based approach.\n- 4S Routine: Swaddle + Side/Stomach position (to calm only, not to sleep) + Shush (loud white noise) + Swing. Use all 4 simultaneously.\n- EASY routine: Eat, Activity, Sleep, Your time.\n- Consistent bedtime 3-4 steps same order every night.\n- Sleep training from 16 weeks: check-and-console, put down drowsy but awake, check every 10 min without picking up.\n- Wake windows by age: 0-6wk 45-60min/2.5h feeds; 6-12wk 1-1.5h/3h; 3-5mo 1.5-2h/3.5h; 5-8mo 2-2.5h/4h; 8-12mo 2.5-3h/4.5h; 12-18mo 3-4h/5h.\n- POTTY TRAINING (MOC 3-Day Method): Commit fully for 3 days at home. Day 1: underwear from morning, prompt every 30 min, celebrate successes calmly ignore accidents neutrally. Day 2: stretch to every 45-60 min, practice pulling pants up/down. Day 3: wait for child to initiate, short outing test. Key rules: do NOT go back to diapers during the day once started. Never force sitting more than 2 min. Poop training often lags 1-4 weeks behind pee. Night training follows naturally.\n\nEMILY OSTER (CRIBSHEET + THE FAMILY FIRM): Evidence-based.\n- Sleep training RCTs show no long-term harm to attachment or behavior.\n- Fed is best. Introduce allergens early. Pacifiers reduce SIDS.\n- Back to sleep, firm surface, no bumpers. Room share not bed share.\n- Tantrums 18-24mo are neurological, not manipulation.\n- Fever under 3mo = call doctor immediately.\n- POTTY: Readiness matters more than age. Regression is normal. Poop resistance affects ~30%. Punishment backfires.\n\nWONDER WEEKS:\n'+leapLines+'\nDuring leaps: fussiness/clinginess/worse sleep = normal and temporary.'+toddlerCtx+'\n\nACTIVE CHILD: '+(k.name||'Baby')+', '+formatAge(w)+' ('+w.toFixed(1)+' weeks)\n'+(isToddlerKid?'This is a TODDLER — focus on age-appropriate toddler guidance, not infant tracking.':'Wake window: '+ww.label+' | Feed: every ~'+ww.feed+'h | Sleep: ~'+ww.sleep+'h/day\n'+(leap?'CURRENTLY IN LEAP '+leap.n+': "'+leap.name+'" — fussiness and sleep disruption expected':'Not in a leap')+(upLeap?'\nLeap '+upLeap.n+' coming in ~'+Math.round((upLeap.s-w)*7)+' days':''))+'\nRecent logs: '+(recentLogs||'none')+(sibCtx?'\n\nSIBLING INFO:\n'+sibCtx:'')+'\n\nBe warm, specific, and practical. Always say which framework your advice comes from. When frameworks differ, acknowledge it. Recommend pediatrician for medical concerns. Keep responses concise and actionable.';
+  try{
+    var hist=(k.chatHistory||[]).filter(function(m){return m.role==='user'||m.role==='assistant';}).slice(-20);
+    var msgs2=hist.slice(0,-1).concat([{role:'user',content:text}]);
+    var res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':appState.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:msgs2})});
+    var data=await res.json();
+    if(data.error)throw new Error(data.error.message);
+    var reply=(data.content&&data.content.find(function(b){return b.type==='text';})||{text:'Sorry, no response.'}).text;
+    hideTyping();appendBubble('bot',reply);
+  }catch(err){
+    hideTyping();
+    var msg=err.message&&err.message.indexOf('401')>-1?'Invalid API key - check Settings':err.message&&err.message.indexOf('429')>-1?'Rate limited - wait a moment':'Error: '+err.message;
+    appendBubble('bot',msg);
+  }
+  document.getElementById('send-btn').disabled=false;
+}
+
+function openSettings(){
+  var k=kid();
+  document.getElementById('settings-title').textContent='Edit - '+(k.name||'Baby');
+  document.getElementById('set-name').value=k.name||'';
+  document.getElementById('set-dob').value=k.dob||'';
+  document.getElementById('set-key').value=appState.apiKey||'';
+  settingsColor=k.color||'green';
+  renderColorPicker('settings-colors',settingsColor);
+  document.getElementById('settings-modal').style.display='flex';
+}
+function closeSettings(){document.getElementById('settings-modal').style.display='none';applyTheme(kid().color||'green');}
+function saveSettings(e){
+  e.preventDefault();
+  kid().name=document.getElementById('set-name').value.trim();
+  kid().dob=document.getElementById('set-dob').value;
+  kid().color=settingsColor;
+  appState.apiKey=document.getElementById('set-key').value.trim();
+  saveLocal();applyTheme(kid().color);renderKidBar();updateHeader();closeSettings();renderDashboard();
+  pushKid(kid());
+}
+function confirmRemoveKid(){
+  if(appState.kids.length<=1){alert('You need at least one child.');return;}
+  if(confirm('Remove '+(kid().name||'this child')+' and all their data?')){
+    var kidId=kid().id;
+    appState.kids.splice(appState.activeKid,1);appState.activeKid=0;
+    saveLocal();closeSettings();switchKid(0);renderKidBar();
+    sbDelete('kids','id=eq.'+kidId);
+  }
+}
+function openAddKid(){
+  addKidColor=KID_COLORS.find(function(c){return!appState.kids.find(function(k){return k.color===c.id;});})||{id:'sky'};
+  addKidColor=addKidColor.id||'sky';
+  renderColorPicker('addkid-colors',addKidColor);
+  document.getElementById('ak-name').value='';document.getElementById('ak-dob').value='';
+  document.getElementById('addkid-modal').style.display='flex';
+}
+function closeAddKid(){document.getElementById('addkid-modal').style.display='none';}
+async function saveNewKid(e){
+  e.preventDefault();
+  var name=document.getElementById('ak-name').value.trim(),dob=document.getElementById('ak-dob').value;
+  if(!dob)return;
+  var kidId='kid_'+Date.now();
+  var newKid={id:kidId,name:name,dob:dob,color:addKidColor,logs:[],chatHistory:[]};
+  appState.kids.push(newKid);
+  appState.activeKid=appState.kids.length-1;
+  saveLocal();closeAddKid();applyTheme(kid().color);renderKidBar();updateHeader();setTab('dashboard');
+  try{await pushKid(newKid);}catch(e){console.log('New kid sync error',e);}
+}
+function deleteLog(id){
+  kid().logs=(kid().logs||[]).filter(function(l){return l.id!==id;});
+  saveLocal();renderLog();renderDashboard();
+  deleteLogCloud(id);
+}
+function showInstallBanner(){
+  if(localStorage.getItem('bc_install_dismissed'))return;
+  var isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS&&!window.navigator.standalone){document.getElementById('install-msg').textContent='📱 Tap Share → Add to Home Screen to install';document.getElementById('install-banner').style.display='flex';}
+}
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();document.getElementById('install-banner').style.display='flex';
+  document.getElementById('install-msg').textContent='📱 Install Baby Companion as an app';
+  document.querySelector('#install-banner button').onclick=function(){e.prompt();e.userChoice.then(function(){dismissInstall();});};
+});
+function dismissInstall(){localStorage.setItem('bc_install_dismissed','1');document.getElementById('install-banner').style.display='none';}
+
+loadLocal();
+renderColorPicker('setup-colors','green');
+if(appState.kids.length>0&&appState.apiKey){bootApp();}
+</script>
+</body>
+</html>
